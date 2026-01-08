@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Exercise</title>
+</head>
+<body>
+<canvas id="myCanvas" width="500" height="300" style="border:1px solid black;"></canvas>
+<script>
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "blue";
+    ctx.fillRect(20, 20, 120, 80);
+    ctx.beginPath();
+    ctx.arc(250, 80, 40, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.moveTo(50, 180);
+    ctx.lineTo(450, 180);
+    ctx.strokeStyle = "green";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.closePath();
+    ctx.font = "24px Arial";
+    ctx.fillStyle = "black";
+    ctx.fillText("HTML5 Canvas", 160, 260);
+</script>
+</body>
+</html>

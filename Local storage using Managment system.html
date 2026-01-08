@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>User Management System</title>
+    <!--CSS Styles-->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            background: #fff;
+            padding: 30px;
+            max-width: 400px;
+            margin: auto;
+            border-radius: 5px;
+        }
+        input {
+            width: 85%;
+            padding: 8px;
+            margin: 8px 0;
+        }
+        button {
+            padding: 8px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #eaeaea;
+        }
+        .delete-btn:hower {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+        }
+        .clear-btn:hower {
+            margin-top: 15px;
+            background-color: #333; 
+            color: white;
+        }
+        #error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h2>User Registration & Management</h2>
+<form onsubmit="registerUser(event)">
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="text" id="mobile" placeholder="Mobile Number" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Register</button>
+    <p id="error"></p>
+</form>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+</table>
+<center>
+    <button class="clear-btn" onclick="clearAll()">Clear All Users</button>
+</center>
+<!--Javascript-->
+<script>
+    function getUsers() {
+        return JSON.parse(localStorage.getItem("users")) || [];
+    }
+    function saveUsers(users) {
+        localStorage.setItem("users", JSON.stringify(users));
+    }
+    function registerUser(event) {
+        event.preventDefault();
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const mobile = document.getElementById("mobile").value;
+        const password = document.getElementById("password").value;
+        const error = document.getElementById("error");
+        error.innerText = "";
+        if (mobile.length !== 10 || isNaN(mobile)) {
+            error.innerText = "Mobile number must be 10 digits";
+            return;
+        }
+        if (password.length < 6) {
+            error.innerText = "Password must be at least 6 characters";
+            return;
+        }
+        const users = getUsers();
+        if (users.some(user => user.email === email)) {
+            error.innerText = "Email already registered";
+            return;
+        }
+        users.push({ name, email, mobile, password });
+        saveUsers(users);
+        event.target.reset();
+        displayUsers();
+    }
+    function displayUsers() {
+        const table = document.getElementById("userTable");
+        table.innerHTML = "";
+        const users = getUsers();
+        users.forEach((user, index) => {
+            table.innerHTML += `
+                <tr>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.mobile}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteUser(${index})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    function deleteUser(index) {
+        const users = getUsers();
+        users.splice(index, 1);
+        saveUsers(users);
+        displayUsers();
+    }
+    function clearAll() {
+        localStorage.removeItem("users");
+        displayUsers();
+    }
+    displayUsers();
+</script>
+</body>
+</html>

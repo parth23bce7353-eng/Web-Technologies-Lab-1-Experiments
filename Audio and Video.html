@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Audio and Video</title>
+    <!--CSS Styles-->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .media-section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="media-section">
+        <h2>Audio Player</h2>
+        <audio id="audioPlayer" controls>
+            <source src="audio.mp3" type="audio/mpeg">
+        </audio>
+        <p>Current Time: <span id="audioTime">12:30</span></p>
+    </div>
+    <div class="media-section">
+        <h2>Video Player</h2>
+        <video id="videoPlayer" width="400" controls>
+            <source src="video.mp4" type="video/mp4">
+        </video>
+        <p>Current Time: <span id="videoTime">0:00</span></p>
+    </div>
+    <!--Javascript-->
+    <script>
+        const audio = document.getElementById("audioPlayer");
+        const video = document.getElementById("videoPlayer");
+        const audioTime = document.getElementById("audioTime");
+        const videoTime = document.getElementById("videoTime");
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return min + ":" + (sec < 10 ? "0" + sec : sec);
+        }
+        audio.addEventListener("timeupdate", () => {
+            audioTime.textContent = formatTime(audio.currentTime);
+        });
+        video.addEventListener("timeupdate", () => {
+            videoTime.textContent = formatTime(video.currentTime);
+        });
+    </script>
+</body>
+</html>
