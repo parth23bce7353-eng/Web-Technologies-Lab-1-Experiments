@@ -1,0 +1,105 @@
+<html>
+<head>
+    <title>Real-Time Activity Monitor</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background: #1a1a1a; color: #00ff00; padding: 20px; display: flex; gap: 20px; }
+        .dashboard { flex: 1; background: #222; padding: 20px; border: 1px solid #444; border-radius: 8px; }
+        .log-container { flex: 1; background: #000; padding: 15px; height: 80vh; overflow-y: scroll; border: 1px solid #333; font-size: 0.85rem; }
+        .log-entry { margin-bottom: 5px; border-left: 2px solid #00ff00; padding-left: 10px; }
+        .warning { color: #ff3e3e; font-weight: bold; animation: blink 1s infinite; }
+        button { background: #444; color: white; border: 1px solid #666; padding: 10px; cursor: pointer; margin-right: 10px; }
+        button:hover { background: #555; }
+        input { background: #333; color: white; border: 1px solid #555; padding: 10px; width: 100%; margin: 10px 0; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body id="monitorBody">
+
+<div class="dashboard">
+    <h2>System Control</h2>
+    <p>Interact with the elements below to generate logs:</p>
+    <input type="text" placeholder="Type something here...">
+    <div style="margin: 20px 0;">
+        <button id="testBtn">Test Button</button>
+        <button id="dangerBtn" style="color: red;">Suspicious Click Zone</button>
+    </div>
+    <hr>
+    <button onclick="exportLog()">Export Log</button>
+    <button onclick="resetLog()">Reset System</button>
+    <div id="alertBox" class="warning" style="margin-top:20px; display:none;">⚠️ SYSTEM ALERT: UNUSUAL ACTIVITY DETECTED</div>
+</div>
+
+<div class="log-container" id="logDisplay">
+    <div class="log-entry">> Initializing Activity Monitor...</div>
+</div>
+
+<script>
+    const activityLog = [];
+    const logDisplay = document.getElementById('logDisplay');
+    const alertBox = document.getElementById('alertBox');
+    
+    let clickCount = 0;
+    const CLICK_LIMIT = 10;
+    const TIME_WINDOW = 5000;
+
+    function logEvent(type, target, details = "") {
+        const entry = {
+            timestamp: new Date().toLocaleTimeString(),
+            type: type,
+            target: target.tagName + (target.id ? `#${target.id}` : ""),
+            details: details
+        };
+
+        activityLog.push(entry);
+        updateUI(entry);
+        checkSecurity();
+    }
+
+    function updateUI(entry) {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = `[${entry.timestamp}] <strong>${entry.type}</strong> on ${entry.target} ${entry.details}`;
+        logDisplay.prepend(div);
+    }
+
+    document.addEventListener('click', (e) => {
+        logEvent('CLICK', e.target);
+        clickCount++;
+        setTimeout(() => clickCount--, TIME_WINDOW);
+    }, true);
+
+    document.addEventListener('keydown', (e) => {
+        logEvent('KEYPRESS', e.target, `(Key: ${e.key})`);
+    });
+
+    window.addEventListener('focus', () => logEvent('SYSTEM', window, 'User returned to tab'));
+    window.addEventListener('blur', () => logEvent('SYSTEM', window, 'User left tab'));
+
+    function checkSecurity() {
+        if (clickCount > CLICK_LIMIT) {
+            alertBox.style.display = 'block';
+            logEvent('WARNING', alertBox, 'Rapid clicking detected!');
+        } else {
+            alertBox.style.display = 'none';
+        }
+    }
+
+    function exportLog() {
+        const text = activityLog.map(l => `[${l.timestamp}] ${l.type} - ${l.target} ${l.details}`).join('\n');
+        const blob = new Blob([text], { type: 'text/plain' });
+        const anchor = document.createElement('a');
+        anchor.download = 'user_activity_log.txt';
+        anchor.href = window.URL.createObjectURL(blob);
+        anchor.click();
+    }
+
+    function resetLog() {
+        activityLog.length = 0;
+        clickCount = 0;
+        logDisplay.innerHTML = '<div class="log-entry">> System Reset. Awaiting input...</div>';
+        alertBox.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

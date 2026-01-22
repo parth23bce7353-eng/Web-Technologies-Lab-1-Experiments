@@ -1,0 +1,129 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Multi-Stage Form Engine</title>
+    <style>
+        :root { --primary: #4a90e2; --success: #27ae60; --bg: #f5f7fa; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 40px; }
+        .wizard-card { background: white; width: 500px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .progress-container { height: 8px; background: #e0e0e0; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        #progressBar { height: 100%; width: 25%; background: var(--primary); transition: width 0.4s ease; }
+        .stage { display: none; animation: fadeIn 0.4s; }
+        .stage.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        input.error { border-color: #e74c3c; background: #fff8f8; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 10px 25px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-prev { background: #ddd; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+<div class="wizard-card">
+    <div class="progress-container">
+        <div id="progressBar"></div>
+    </div>
+    <form id="workflowForm">
+        <div class="stage active" data-step="1">
+            <h2>Step 1: Identity</h2>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="fullname" placeholder="John Doe">
+            </div>
+        </div>
+        <div class="stage" data-step="2">
+            <h2>Step 2: Contact</h2>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="john@example.com">
+            </div>
+        </div>
+        <div class="stage" data-step="3">
+            <h2>Step 3: Security</h2>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="pass" placeholder="Minimum 8 characters">
+            </div>
+        </div>
+        <div class="stage" data-step="4">
+            <h2>Step 4: Review</h2>
+            <div id="reviewData" style="background: #f9f9f9; padding: 15px; border-radius: 6px;">
+                </div>
+            </div>
+        <div class="controls">
+            <button type="button" class="btn-prev" id="prevBtn" disabled>Previous</button>
+            <button type="button" class="btn-next" id="nextBtn">Next Step</button>
+        </div>
+    </form>
+</div>
+<script>
+    let currentStep = 1;
+    const formData = {};
+    const totalSteps = 4;
+    const validators = {
+        1: () => {
+            const val = document.getElementById('fullname').value.trim();
+            return val.length > 2;
+        },
+        2: () => {
+            const email = document.getElementById('email').value;
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        },
+        3: () => {
+            return document.getElementById('pass').value.length >= 8;
+        },
+        4: () => true
+    };
+    function updateUI() {
+        document.querySelectorAll('.stage').forEach(s => {
+            s.classList.toggle('active', s.dataset.step == currentStep);
+        });
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+        document.getElementById('prevBtn').disabled = (currentStep === 1);
+        const nextBtn = document.getElementById('nextBtn');
+        nextBtn.innerText = (currentStep === totalSteps) ? "Submit" : "Next Step";
+        if (currentStep === 4) {
+            document.getElementById('reviewData').innerHTML = `
+                <p><strong>Name:</strong> ${formData.fullname}</p>
+                <p><strong>Email:</strong> ${formData.email}</p>
+                <p><strong>Security:</strong> Password Set ✓</p>
+            `;
+        }
+    }
+    function saveStepData() {
+        if (currentStep === 1) formData.fullname = document.getElementById('fullname').value;
+        if (currentStep === 2) formData.email = document.getElementById('email').value;
+        if (currentStep === 3) formData.pass = document.getElementById('pass').value;
+    }
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        if (validators[currentStep]()) {
+            saveStepData();
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            } 
+            else {
+                alert("Form Submitted! Data: " + JSON.stringify(formData));
+            }
+        } 
+        else {
+            const activeInput = document.querySelector('.stage.active input');
+            activeInput.classList.add('error');
+            setTimeout(() => activeInput.classList.remove('error'), 500);
+        }
+    });
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            updateUI();
+        }
+    });
+    updateUI();
+</script>
+</body>
+</html>

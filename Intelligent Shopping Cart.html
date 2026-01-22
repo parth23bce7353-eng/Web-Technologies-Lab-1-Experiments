@@ -1,0 +1,132 @@
+<html>
+<head>
+    <title>Intelligent Shopping Cart</title>
+    <style>
+        body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; background: #f0f2f5; }
+        .products, .cart-container { background: white; padding: 20px; border-radius: 8px; flex: 1; }
+        .product-item { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 10px; border: 1px solid #eee; }
+        .cart-item { border-bottom: 1px solid #ddd; padding: 10px 0; }
+        .discount-label { color: #27ae60; font-size: 0.85rem; font-weight: bold; }
+        .price-summary { margin-top: 20px; border-top: 2px solid #333; padding-top: 10px; }
+        .invalid-coupon { border: 1px solid red; }
+    </style>
+</head>
+<body>
+
+<div class="products">
+    <h2>Available Products</h2>
+    <div id="productList"></div>
+</div>
+
+<div class="cart-container">
+    <h2>Your Cart</h2>
+    <div id="cartList"></div>
+    
+    <div class="price-summary">
+        <input type="text" id="couponInput" placeholder="Enter Coupon (e.g. SAVE20)">
+        <p>Subtotal: $<span id="subtotal">0.00</span></p>
+        <p id="discountsApplied" class="discount-label"></p>
+        <h3>Total: $<span id="finalTotal">0.00</span></h3>
+    </div>
+</div>
+
+<script>
+    const products = [
+        { id: 1, name: "Laptop", price: 1000, category: "Electronics" },
+        { id: 2, name: "Headphones", price: 200, category: "Electronics" },
+        { id: 3, name: "Coffee Mug", price: 15, category: "Home" },
+        { id: 4, name: "Notebook", price: 5, category: "Office" }
+    ];
+
+    let cart = [];
+    let activeCoupon = "";
+
+    function renderProducts() {
+        const list = document.getElementById('productList');
+        list.innerHTML = products.map(p => `
+            <div class="product-item">
+                <span>${p.name} ($${p.price})</span>
+                <button onclick="addToCart(${p.id})">Add to Cart</button>
+            </div>
+        `).join('');
+    }
+
+    function renderCart() {
+        const list = document.getElementById('cartList');
+        list.innerHTML = cart.map((item, index) => `
+            <div class="cart-item">
+                <strong>${item.name}</strong> - $${item.price} x 
+                <input type="number" value="${item.quantity}" min="1" 
+                       onchange="updateQuantity(${index}, this.value)" style="width:40px">
+                <button onclick="removeItem(${index})">Remove</button>
+            </div>
+        `).join('');
+        calculateTotals();
+    }
+
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        const existing = cart.find(item => item.id === productId);
+        
+        if (existing) {
+            existing.quantity++;
+        } else {
+            cart.push({ ...product, quantity: 1 });
+        }
+        renderCart();
+    }
+
+    function updateQuantity(index, val) {
+        cart[index].quantity = parseInt(val);
+        renderCart();
+    }
+
+    function removeItem(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    function calculateTotals() {
+        let subtotal = 0;
+        let discountMsg = [];
+        
+        let afterRulesTotal = cart.reduce((acc, item) => {
+            let itemPrice = item.price * item.quantity;
+            subtotal += itemPrice;
+
+            if (item.quantity > 5) {
+                itemPrice *= 0.9;
+                discountMsg.push(`Bulk 10% off ${item.name}`);
+            }
+            else if (item.category === "Electronics") {
+                itemPrice *= 0.85;
+                discountMsg.push(`Electronics 15% off ${item.name}`);
+            }
+            return acc + itemPrice;
+        }, 0);
+
+        const currentHour = new Date().getHours();
+        if (currentHour === 17) {
+            afterRulesTotal -= 5;
+            discountMsg.push("Happy Hour Reward: -$5.00");
+        }
+
+        const coupon = document.getElementById('couponInput').value.trim().toUpperCase();
+        if (coupon.startsWith("SAVE") && coupon.length === 6) {
+            const percent = parseInt(coupon.substring(4));
+            if (!isNaN(percent)) {
+                afterRulesTotal *= (1 - percent / 100);
+                discountMsg.push(`Coupon ${percent}% applied`);
+            }
+        }
+
+        document.getElementById('subtotal').innerText = subtotal.toFixed(2);
+        document.getElementById('finalTotal').innerText = Math.max(0, afterRulesTotal).toFixed(2);
+        document.getElementById('discountsApplied').innerHTML = discountMsg.join('<br>');
+    }
+    document.getElementById('couponInput').addEventListener('input', calculateTotals);
+    renderProducts();
+</script>
+
+</body>
+</html>

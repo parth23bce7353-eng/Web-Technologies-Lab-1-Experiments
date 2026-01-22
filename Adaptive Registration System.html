@@ -1,0 +1,158 @@
+<html>
+<head>
+    <title>Adaptive Registration System</title>
+    <style>
+        :root {
+            --error-color: #ff4d4d;
+            --success-color: #2ecc71;
+            --primary-color: #3498db;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        
+        h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+        .form-group { margin-bottom: 15px; position: relative; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; transition: all 0.3s;
+        }
+
+        input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+
+        input.invalid { border-color: var(--error-color); background-color: #fff6f6; }
+
+        .hint { font-size: 0.75rem; color: #666; margin-top: 4px; display: block; }
+        
+        .error-text { color: var(--error-color); font-size: 0.75rem; margin-top: 4px; display: none; }
+
+        #skillsSection { transition: opacity 0.3s ease; }
+
+        button {
+            width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none;
+            border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px;
+        }
+
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        .role-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; 
+            text-transform: uppercase; background: #eee; margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>User Registration</h2>
+    <div id="roleIndicator" class="role-badge">Role: Student</div>
+
+    <form id="registrationForm" novalidate>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="email@example.com" required>
+            <small class="error-text" id="emailError">Invalid email or domain</small>
+        </div>
+
+        <div class="form-group">
+            <label>Role</label>
+            <select id="role">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+            <small class="hint" id="passHint">Min 6 characters</small>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="age" placeholder="Min age based on role">
+        </div>
+
+        <div class="form-group" id="skillsSection">
+            <label>Skills</label>
+            <input type="text" id="skills" placeholder="e.g. Java, Python">
+        </div>
+
+        <button type="submit" id="submitBtn" disabled>Complete Registration</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('registrationForm');
+    const roleSelect = document.getElementById('role');
+    const roleIndicator = document.getElementById('roleIndicator');
+    const skillsSection = document.getElementById('skillsSection');
+    const passHint = document.getElementById('passHint');
+    const submitBtn = document.getElementById('submitBtn');
+    const validationRules = {
+        student: { minAge: 13, domain: null, strongPass: false, hint: "Standard: 6+ characters" },
+        teacher: { minAge: 21, domain: "edu.com", strongPass: false, hint: "Standard: 6+ chars | Must use @edu.com" },
+        admin: { minAge: 25, domain: "admin.corp", strongPass: true, hint: "Admin: 10+ chars, 1 number, 1 symbol | @admin.corp" }
+    };
+    roleSelect.addEventListener('change', () => {
+        const role = roleSelect.value;
+        const rules = validationRules[role];
+        skillsSection.style.display = role === 'admin' ? 'none' : 'block';
+        roleIndicator.innerText = `Role: ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+        passHint.innerText = rules.hint;
+
+        validateForm();
+    });
+    function validateForm() {
+        const role = roleSelect.value;
+        const rules = validationRules[role];
+        const emailValue = document.getElementById('email').value;
+        const passValue = document.getElementById('password').value;
+        const confirmValue = document.getElementById('confirmPassword').value;
+        const ageValue = parseInt(document.getElementById('age').value);
+        const isEmailValid = (function() {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!regex.test(emailValue)) return false;
+            if (rules.domain && !emailValue.endsWith(rules.domain)) return false;
+            return true;
+        })();
+        const isPassValid = (function() {
+            if (rules.strongPass) {
+                return passValue.length >= 10 && /[0-9]/.test(passValue) && /[^A-Za-z0-9]/.test(passValue);
+            }
+            return passValue.length >= 6;
+        })();
+        const isAgeValid = ageValue >= rules.minAge;
+        const doesPassMatch = passValue === confirmValue && passValue !== "";
+        document.getElementById('email').classList.toggle('invalid', !isEmailValid && emailValue !== "");
+        document.getElementById('emailError').style.display = (!isEmailValid && emailValue !== "") ? 'block' : 'none';
+        document.getElementById('password').classList.toggle('invalid', !isPassValid && passValue !== "");
+        document.getElementById('confirmPassword').classList.toggle('invalid', !doesPassMatch && confirmValue !== "");
+        const isFormValid = isEmailValid && isPassValid && isAgeValid && doesPassMatch && document.getElementById('name').value !== "";
+        submitBtn.disabled = !isFormValid;
+    }
+    form.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', validateForm);
+    });
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Form successfully submitted for role: ' + roleSelect.value);
+    });
+</script>
+</body>
+</html>

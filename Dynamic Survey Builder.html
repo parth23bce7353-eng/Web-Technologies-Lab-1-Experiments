@@ -1,0 +1,168 @@
+<html>
+<head>
+    <title>Dynamic Survey Builder</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; padding: 40px; }
+        .survey-container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .question-block { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .question-label { font-weight: 600; display: block; margin-bottom: 10px; }
+        .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 5px; display: none; }
+        .invalid input { border: 1.5px solid #e74c3c; }
+        .option-group { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        button { background: #6c5ce7; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        button:hover { background: #5b4cc4; }
+    </style>
+</head>
+<body>
+
+<div class="survey-container">
+    <h2 id="surveyTitle">Customer Feedback Survey</h2>
+    <form id="dynamicForm"></form>
+    <div id="successMsg" style="display:none; color: green; font-weight: bold;">Survey Submitted Successfully!</div>
+</div>
+
+<script>
+    // 1. Question Schema Configuration
+    const surveySchema = [
+        {
+            id: "q1",
+            type: "text",
+            label: "What is your full name?",
+            required: true,
+            limit: 50
+        },
+        {
+            id: "q2",
+            type: "radio",
+            label: "How would you rate our service?",
+            options: ["Excellent", "Good", "Poor"],
+            required: true
+        },
+        {
+            id: "q3",
+            type: "checkbox",
+            label: "Which features did you use? (Select at least 2)",
+            options: ["Mobile App", "Web Dashboard", "API", "Customer Support"],
+            minSelection: 2
+        }
+    ];
+
+    const form = document.getElementById('dynamicForm');
+
+    // 2. DOM Generation Engine
+    function generateSurvey() {
+        surveySchema.forEach(q => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `container-${q.id}`;
+
+            const label = document.createElement('label');
+            label.className = 'question-label';
+            label.innerText = q.label + (q.required ? ' *' : '');
+            block.appendChild(label);
+
+            // Factory: Choose input type
+            if (q.type === 'text') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = q.id;
+                input.placeholder = "Your answer here...";
+                block.appendChild(input);
+            } 
+            else if (q.type === 'radio' || q.type === 'checkbox') {
+                q.options.forEach(opt => {
+                    const div = document.createElement('div');
+                    div.className = 'option-group';
+                    const input = document.createElement('input');
+                    input.type = q.type;
+                    input.name = q.id; // Groups radio buttons
+                    input.value = opt;
+                    
+                    const span = document.createElement('span');
+                    span.innerText = opt;
+                    
+                    div.appendChild(input);
+                    div.appendChild(span);
+                    block.appendChild(div);
+                });
+            }
+
+            const error = document.createElement('div');
+            error.className = 'error-msg';
+            error.id = `error-${q.id}`;
+            block.appendChild(error);
+
+            form.appendChild(block);
+        });
+
+        const submitBtn = document.createElement('button');
+        submitBtn.type = 'submit';
+        submitBtn.innerText = 'Submit Survey';
+        form.appendChild(submitBtn);
+    }
+
+    // 3. Validation Logic
+    function validate() {
+        let isFormValid = true;
+
+        surveySchema.forEach(q => {
+            const errorElement = document.getElementById(`error-${q.id}`);
+            const container = document.getElementById(`container-${q.id}`);
+            let isValid = true;
+            let message = "";
+
+            if (q.type === 'text') {
+                const val = document.getElementById(q.id).value.trim();
+                if (q.required && val === "") {
+                    isValid = false;
+                    message = "This field is required.";
+                } else if (q.limit && val.length > q.limit) {
+                    isValid = false;
+                    message = `Maximum ${q.limit} characters allowed.`;
+                }
+            } 
+            
+            else if (q.type === 'radio') {
+                const checked = form.querySelector(`input[name="${q.id}"]:checked`);
+                if (q.required && !checked) {
+                    isValid = false;
+                    message = "Please select an option.";
+                }
+            }
+
+            else if (q.type === 'checkbox') {
+                const checkedCount = form.querySelectorAll(`input[name="${q.id}"]:checked`).length;
+                if (q.minSelection && checkedCount < q.minSelection) {
+                    isValid = false;
+                    message = `Please select at least ${q.minSelection} options.`;
+                }
+            }
+
+            // UI Feedback
+            if (!isValid) {
+                errorElement.innerText = message;
+                errorElement.style.display = 'block';
+                container.classList.add('invalid');
+                isFormValid = false;
+            } else {
+                errorElement.style.display = 'none';
+                container.classList.remove('invalid');
+            }
+        });
+
+        return isFormValid;
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (validate()) {
+            form.style.display = 'none';
+            document.getElementById('surveyTitle').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'block';
+        }
+    });
+    generateSurvey();
+</script>
+
+</body>
+</html>
