@@ -1,0 +1,10 @@
+{
+  "products": [
+    { "name": "iPhone 14", "price": 79900, "category": "Electronics" },
+    { "name": "Samsung Galaxy S23", "price": 74999, "category": "Electronics" },
+    { "name": "Nike Air Max", "price": 5999, "category": "Footwear" },
+    { "name": "Adidas Hoodie", "price": 2999, "category": "Clothing" },
+    { "name": "Dell Laptop", "price": 65000, "category": "Computers" },
+    { "name": "HP Printer", "price": 12000, "category": "Electronics" }
+  ]
+}

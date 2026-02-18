@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <title>Username Availability Checker</title>
+        <style>
+            body {
+                font-family: Arial;
+            }
+            .message {
+                font-weight: bold;
+                margin-top: 5px;
+            }
+            .available {
+                color: green;
+            }
+            .taken {
+                color: red;
+            }
+            .loading {
+                color: blue;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Registration Form</h2>
+        <form id="registrationForm">
+            <label>Username:</label><br>
+            <input type="text" id="username" required>
+            <div id="feedback" class="message"></div>
+            <br>
+            <button type="submit">Register</button>
+        </form>
+        <script>
+            const usernameInput = document.getElementById("username");
+            const feedback = document.getElementById("feedback");
+            const form = document.getElementById("registrationForm");
+            let usernameAvailable = false;
+            usernameInput.addEventListener("input", function () {
+                const username = usernameInput.value.trim();
+                if (username.length === 0) {
+                    feedback.textContent = "";
+                    return;
+                }
+                feedback.textContent = "Checking...";
+                feedback.className = "loading";
+                fetch("users.json")
+                .then(response => response.json())
+                .then(data => {
+                    const users = data.users;
+                    if (users.includes(username.toLowerCase())) {
+                        feedback.textContent = "Username already taken";
+                        feedback.className = "message taken";
+                        usernameAvailable = false;
+                    }
+                    else {
+                        feedback.textContent = "Username available";
+                        feedback.className = "message available";
+                        usernameAvailable = true;
+                    }
+                })
+                .catch(error => {
+                    feedback.textContent = "Error checking username";
+                    feedback.className = "taken";
+                    usernameAvailable = false;
+                });
+            });
+            form.addEventListener("submit", function (e) {
+                if (!usernameAvailable) {
+                    e.preventDefault();
+                    alert("Please choose an available username.");
+                }
+                else {
+                    alert("Form submitted successfully!");
+                }
+            });
+        </script>
+    </body>
+</html>

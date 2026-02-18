@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Management System</title>
+    <style>
+        body { font-family: Arial; }
+        input { margin: 5px; padding: 5px; }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+<h2>Student Management System</h2>
+<form id="studentForm">
+    <input type="text" id="id" placeholder="Student ID" required>
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="text" id="dept" placeholder="Department" required>
+    <input type="number" id="marks" placeholder="Marks" required>
+    <button type="submit">Add Student</button>
+</form>
+<p id="message"></p>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Marks</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="studentTable"></tbody>
+</table>
+<script>
+const form = document.getElementById("studentForm");
+const table = document.getElementById("studentTable");
+const message = document.getElementById("message");
+const baseURL = "http://localhost:3000/students";
+async function fetchStudents() {
+    const res = await fetch(baseURL);
+    const data = await res.json();
+    table.innerHTML = "";
+    data.forEach(student => {
+        table.innerHTML += `
+            <tr>
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${student.dept}</td>
+                <td>${student.marks}</td>
+                <td>
+                    <button onclick="editStudent('${student.id}')">Edit</button>
+                    <button onclick="deleteStudent('${student.id}')">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const student = {
+        id: document.getElementById("id").value,
+        name: document.getElementById("name").value,
+        dept: document.getElementById("dept").value,
+        marks: document.getElementById("marks").value
+    };
+    try {
+        const res = await fetch(baseURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(student)
+        });
+        const data = await res.json();
+        if (res.status === 200) {
+            message.className = "success";
+            form.reset();
+            fetchStudents();
+        } 
+        else {
+            message.className = "error";
+        }
+        message.textContent = data.message;
+    } 
+    catch {
+        message.textContent = "Server error (500)";
+        message.className = "error";
+    }
+});
+async function deleteStudent(id) {
+    const res = await fetch(`${baseURL}/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (res.status === 200) {
+        message.className = "success";
+        fetchStudents();
+    } 
+    else {
+        message.className = "error";
+    }
+    message.textContent = data.message;
+}
+async function editStudent(id) {
+    const name = prompt("Enter new name:");
+    const dept = prompt("Enter new department:");
+    const marks = prompt("Enter new marks:");
+    const updatedStudent = { id, name, dept, marks };
+    const res = await fetch(`${baseURL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedStudent)
+    });
+    const data = await res.json();
+    if (res.status === 200) {
+        message.className = "success";
+        fetchStudents();
+    } 
+    else {
+        message.className = "error";
+    }
+    message.textContent = data.message;
+}
+fetchStudents();
+</script>
+</body>
+</html>
