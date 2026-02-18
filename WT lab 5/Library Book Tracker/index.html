@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <title>Library Book Tracker</title>
+        <style>
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+                padding: 8px;
+            }
+            button {
+                margin: 5px;
+            }
+            #message {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Library Book Tracker (XML + AJAX)</h2>
+        <button onclick="loadBooks()">Load Books</button>
+        <h3>Add / Update / Delete Book</h3>
+        Book ID: <input type="text" id="bookId"><br><br>
+        Title: <input type="text" id="bookTitle"><br><br>
+        Author: <input type="text" id="bookAuthor"><br><br>
+        Status:
+        <select id="bookStatus">
+            <option value="">Select</option>
+            <option value="Available">Available</option>
+            <option value="Issued">Issued</option>
+        </select>
+        <br><br>
+        <button onclick="addBook()">Add Book</button>
+        <button onclick="updateBook()">Update Status</button>
+        <button onclick="deleteBook()">Delete Book</button>
+        <h3>Book List</h3>
+        <table id="bookTable">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Status</th>
+            </tr>
+        </table>
+        <p id="message"></p>
+        <script src="script.js"></script>
+    </body>
+</html>

@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <title>Product Inventory System</title>
+        <style>
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+                padding: 8px;
+            }
+            button {
+                margin: 5px;
+            }
+            #message {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Product Inventory System (JSON + Fetch)</h2>
+        <button onclick="loadProducts()">Load Inventory</button>
+        <h3>Add / Edit / Delete Product</h3>
+        ID: <input type="number" id="prodId"><br><br>
+        Name: <input type="text" id="prodName"><br><br>
+        Category: <input type="text" id="prodCategory"><br><br>
+        Price: <input type="number" id="prodPrice"><br><br>
+        Stock: <input type="number" id="prodStock"><br><br>
+        <button onclick="addProduct()">Add Product</button>
+        <button onclick="editProduct()">Edit Price/Stock</button>
+        <button onclick="deleteProduct()">Delete Product</button>
+        <h3>Search by Category</h3>
+        Category: <input type="text" id="searchCategory">
+        <button onclick="searchByCategory()">Search</button>
+        <button onclick="displayProducts()">Show All</button>
+        <h3>Inventory Table</h3>
+        <table id="inventoryTable">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+            </tr>
+        </table>
+        <p id="message"></p>
+        <script src="script.js"></script>
+    </body>
+</html>
