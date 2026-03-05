@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title>Online Book Finder</title>
+    </head>
+    <body>
+       <h1>Online Book Finder</h1>
+       <form action="/search">
+            <input type="text" name="title" placeholder="Search book title">
+            <button type="submit">Search</button>
+       </form>
+       <br>
+       <a href="/">All Books</a> |
+       <a href="/category/Programming">Programming</a> |
+       <a href="/sort/price">Sort by Price</a> |
+       <a href="/sort/rating">Sort by Rating</a> |
+       <a href="/top">Top Rated</a>
+       <hr>
+       <table border="1">
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Rating</th>
+                <th>Year</th>
+            </tr>
+            <% books.forEach(function(book){ %>
+            <tr>
+                <td><%= book.title %></td>
+                <td><%= book.author %></td>
+                <td><%= book.category %></td>
+                <td><%= book.price %></td>
+                <td><%= book.rating %></td>
+                <td><%= book.year %></td>
+            </tr>
+            <% }) %>
+        </table>
+    </body>
+</html>

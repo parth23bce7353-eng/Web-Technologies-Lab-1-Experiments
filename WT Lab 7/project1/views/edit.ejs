@@ -1,0 +1,10 @@
+<h2>Edit Note</h2>
+<form action="/notes/<%= note._id %>?_method=PUT" method="POST">
+    Title
+    <input type="text" name="title" value="<%= note.title %>"><br><br>
+    Subject
+    <input type="text" name="subject" value="<%= note.subject %>"><br><br>
+    Description
+    <textarea name="description"><%= note.description %></textarea><br><br>
+    <button>Update</button>
+</form>
